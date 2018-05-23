@@ -1,8 +1,10 @@
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask import make_response
 
 import feedparser
+import datetime
 
 app = Flask(__name__, template_folder='templates')
 
@@ -16,13 +18,20 @@ RSS_FEEDS = {'bbc':"http://feeds.bbci.co.uk/news/rss.xml",
 def get_news():
     query = request.args.get("publication")
     if not query or query.lower() not in RSS_FEEDS:
-        publication = "bbc"
-    else:
-        publication = query.lower()
+        query = request.cookies.get("publication")
+        if not query:
+            publication = "bbc"
+
+    publication = query.lower()
 
     feed = feedparser.parse(RSS_FEEDS[publication])
     articles = feed['entries']
-    return render_template("home.html",articles=articles)
+    response = make_response(render_template("home.html", articles=articles))
+    expires = datetime.datetime.now() + datetime.timedelta(days=365)
+    response.set_cookie("publication", publication, expires=expires)
+    return response
+
+
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

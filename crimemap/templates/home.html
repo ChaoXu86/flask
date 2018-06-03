@@ -45,6 +45,8 @@
     map.enableScrollWheelZoom(true);
     map.addEventListener("click", placeMarker);
 
+    placeCrimes({{crimes |safe}})
+
     function placeMarker(e) {
         if(marker) {
             marker.setPosition(e.point);
@@ -54,5 +56,14 @@
         }
         document.getElementById('latitude').value = e.point.lat;
         document.getElementById('longitude').value = e.point.lng;
+    }
+
+    function placeCrimes(crimes) {
+        for(i=0; i < crimes.length; i++) {
+            //alert('crimes: ' + crimes[i].latitude + ',' + crimes[i].longitude);
+            crime = new BMap.Marker(new BMap.Point(crimes[i].longitude, crimes[i].latitude));
+            crime.setTitle(crimes[i].date + "\n" + crimes[i].category + "\n" + crimes[i].description);
+            map.addOverlay(crime);
+        }
     }
 </script>

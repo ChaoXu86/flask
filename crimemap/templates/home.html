@@ -1,19 +1,58 @@
+<!DOCTYPE html>
 <html>
+    <head>
+        <link type="text/css" rel="stylesheet" href="{{url_for('static',filename='css/style.css')}}" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<!-- api key from netease onmyoji, use for free :) -->
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=bTmfNtKtyu2PjvhUimPjRlDW"></script>
+<title>crimemap</title>
+    </head>
     <body>
-        <head>
-            <title>Crime Map</title>
-        </head>
-
-        <h1>Crime Map</h1>
-        <form action="/add" method="POST">
-            <input type="text" name="userinput">
-            <input type="submit" value="Submit">
-        </form>
-
-        <a href="/clear">clear</a>
-        {% for userinput in data%}
-        <p>{{userinput}}</p>
-        {% endfor %}
+        <div id="allmap"></div>
+        <div id="newcrimeform">
+            <h2>Submit new crime</h2>
+            <form action="/submitcrime" method="POST">
+                <label for="category">Category</label>
+                <select name="category" id="category">
+                    <option value="mugging">Mugging</option>
+                    <option value="breaking">Break-in</option>
+                </select>
+                <label for="date">Date</label>
+                <input name="date" id="date" type="date">
+                <label for="latitude">Latitude</label>
+                <input name="latitude" id="latitude" type="text">
+                <label for="longitude">Longitude</label>
+                <input name="longitude" id="longitude" type="text">
+                <label for="description">Description</label>
+                <textarea name="description" id="description" placeholder="A brief but detailed description of the crime"></textarea>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
     </body>
 </html>
+<script type="text/javascript">
+    var map=new BMap.Map("allmap")
+    var marker;
+    map.centerAndZoom(new BMap.Point(121.370737, 31.111273), 13)
+    map.addControl(new BMap.MapTypeControl({
+        mapTypes:[
+            BMAP_NORMAL_MAP,
+            BMAP_HYBRID_MAP
+        ]
+    }));
+    map.setCurrentCity("Shanghai")
+    map.enableScrollWheelZoom(true);
+    map.addEventListener("click", placeMarker);
 
+    function placeMarker(e) {
+        if(marker) {
+            marker.setPosition(e.point);
+        } else {
+            marker=new BMap.Marker(e.point);
+            map.addOverlay(marker);
+        }
+        document.getElementById('latitude').value = e.point.lat;
+        document.getElementById('longitude').value = e.point.lng;
+    }
+</script>

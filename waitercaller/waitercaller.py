@@ -10,17 +10,20 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
 
+from sinasurlhelper import SinaSURLHelper
 from mockdbhelper import MockDBHelper as DBHelper
 from user import User
 from passwordhelper import PasswordHelper
 
 import config
+import datetime
 
 app = Flask(__name__)
 app.secret_key = 'xsJE4ta74dc9jsjtqvFrGPx6Q57l9a0LZ+G6xCkNzCjqQGjXDpuS3y0qJ5c49+dqMs6p6ZrROAX8'
 login_manager = LoginManager(app)
 DB = DBHelper()
 PH = PasswordHelper()
+BH = SinaSURLHelper()
 
 @app.route("/")
 def home():
@@ -37,7 +40,7 @@ def account():
 def account_createtable():
     tablename = request.form.get("tablenumber")
     tableid = DB.add_table(tablename, current_user.get_id())
-    new_url = config.base_url + "newrequest/" + tableid
+    new_url = BH.shorten_url(config.base_url + "newrequest/" + tableid)
     DB.update_table(tableid, new_url)
     return redirect(url_for('account'))
 
@@ -65,6 +68,11 @@ def logout():
     logout_user()
     return redirect(url_for("home"))
 
+@app.route("/newrequest/<tid>")
+def new_request(tid):
+    DB.add_request(tid, datetime.datetime.now())
+    return "your request has been logged and a waiter will be with you shortly"
+
 @app.route("/register", methods=["POST"])
 def register():
     email = request.form.get("email")
@@ -82,7 +90,19 @@ def register():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    now = datetime.datetime.now()
+    requests = DB.get_requests(current_user.get_id())
+    for req in requests:
+        deltaseconds = (now - req['time']).seconds
+        req['wait_minutes'] = "{}:{}".format((deltaseconds // 60), str(deltaseconds % 60).zfill(2))
+    return render_template("dashboard.html", requests=requests)
+
+@app.route("/dashboard/resolve")
+@login_required
+def dashboard_resolve():
+    request_id = request.args.get("request_id")
+    DB.delete_request(request_id)
+    return redirect(url_for('dashboard'))
 
 @login_manager.user_loader
 def load_user(user_id):

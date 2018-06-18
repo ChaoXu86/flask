@@ -10,6 +10,8 @@ from flask_login import login_user
 from flask_login import logout_user
 from flask_login import current_user
 
+from forms import RegisterationForm
+
 from sinasurlhelper import SinaSURLHelper
 from mockdbhelper import MockDBHelper as DBHelper
 from user import User
@@ -27,7 +29,8 @@ BH = SinaSURLHelper()
 
 @app.route("/")
 def home():
-    return render_template("home.html")
+    registrationform = RegisterationForm()
+    return render_template("home.html", registrationform=registrationform)
 
 @app.route("/account")
 @login_required
@@ -75,17 +78,16 @@ def new_request(tid):
 
 @app.route("/register", methods=["POST"])
 def register():
-    email = request.form.get("email")
-    pw1 = request.form.get("password")
-    pw2 = request.form.get("password2")
-    if not pw1 == pw2:
+    form = RegisterationForm(request.form)
+    if form.validate():
+        if DB.get_user(form.email.data):
+            form.email.errors.append("Email address already registered")
+            return render_template('home.html', RegisterationForm=form)
+        salt = PH.get_salt()
+        hashed = PH.get_hash(form.password2.data + salt)
+        DB.add_user(form.email.data, salt, hashed)
         return redirect(url_for('home'))
-    if DB.get_user(email):
-        return redirect(url_for('home'))
-    salt = PH.get_salt()
-    hashed = PH.get_hash(pw1 + salt)
-    DB.add_user(email, salt, hashed)
-    return redirect(url_for('home'))
+    return render_template("home.html", RegisterationForm=form)
 
 @app.route("/dashboard")
 @login_required

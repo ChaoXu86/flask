@@ -8,10 +8,13 @@ from flask_login import LoginManager
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 
 from mockdbhelper import MockDBHelper as DBHelper
 from user import User
 from passwordhelper import PasswordHelper
+
+import config
 
 app = Flask(__name__)
 app.secret_key = 'xsJE4ta74dc9jsjtqvFrGPx6Q57l9a0LZ+G6xCkNzCjqQGjXDpuS3y0qJ5c49+dqMs6p6ZrROAX8'
@@ -26,7 +29,24 @@ def home():
 @app.route("/account")
 @login_required
 def account():
-    return render_template("account.html")
+    tables = DB.get_tables(current_user.get_id())
+    return render_template("account.html", tables=tables)
+
+@app.route("/account/createtable", methods=["POST"])
+@login_required
+def account_createtable():
+    tablename = request.form.get("tablenumber")
+    tableid = DB.add_table(tablename, current_user.get_id())
+    new_url = config.base_url + "newrequest/" + tableid
+    DB.update_table(tableid, new_url)
+    return redirect(url_for('account'))
+
+@app.route("/account/deletetable")
+@login_required
+def account_deletetable():
+    tableid = request.args.get("tableid")
+    DB.delete_table(tableid)
+    return redirect(url_for('account'))
 
 @app.route("/login", methods=["POST"])
 def login():

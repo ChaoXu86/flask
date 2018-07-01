@@ -24,7 +24,9 @@ ul.errors {
 }
 </style>
   </head>
-  <body>
+  {% block bodytag %}
+  <body {% if onloadmessage %} onload="alert('{{onloadmessage}}');" {% endif %}>
+  {% endblock %}
 
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container">

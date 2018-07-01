@@ -83,8 +83,10 @@ def logout():
 
 @app.route("/newrequest/<tid>")
 def new_request(tid):
-    DB.add_request(tid, datetime.datetime.now())
-    return "your request has been logged and a waiter will be with you shortly"
+    if DB.add_request(tid, datetime.datetime.now()):
+        return "your request has been logged and a waiter will be with you shortly"
+    else:
+        return "There is already a request pending for this table. Please be patient, a waiter will be there ASAP"
 
 @app.route("/register", methods=["POST"])
 def register():

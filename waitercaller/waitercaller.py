@@ -1,3 +1,6 @@
+import config
+import datetime
+
 from flask import Flask
 from flask import render_template
 from flask import redirect
@@ -15,12 +18,13 @@ from forms import LoginForm
 from forms import CreateTableForm
 
 from sinasurlhelper import SinaSURLHelper
-from mockdbhelper import MockDBHelper as DBHelper
+if config.test:
+    from mockdbhelper import MockDBHelper as DBHelper
+else:
+    from dbhelper import DBHelper
 from user import User
 from passwordhelper import PasswordHelper
 
-import config
-import datetime
 
 app = Flask(__name__)
 app.secret_key = 'xsJE4ta74dc9jsjtqvFrGPx6Q57l9a0LZ+G6xCkNzCjqQGjXDpuS3y0qJ5c49+dqMs6p6ZrROAX8'
@@ -47,7 +51,7 @@ def account_createtable():
     form = CreateTableForm(request.form)
     if form.validate():
         tableid = DB.add_table(form.tablenumber.data, current_user.get_id())
-        new_url = BH.shorten_url(config.base_url + "newrequest/" + tableid)
+        new_url = BH.shorten_url(config.base_url + "newrequest/" + str(tableid))
         DB.update_table(tableid, new_url)
         return redirect(url_for('account'))
 

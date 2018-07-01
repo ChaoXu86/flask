@@ -82,12 +82,12 @@ def register():
     if form.validate():
         if DB.get_user(form.email.data):
             form.email.errors.append("Email address already registered")
-            return render_template('home.html', RegisterationForm=form)
+            return render_template('home.html', registrationform=form)
         salt = PH.get_salt()
         hashed = PH.get_hash(form.password2.data + salt)
         DB.add_user(form.email.data, salt, hashed)
         return redirect(url_for('home'))
-    return render_template("home.html", RegisterationForm=form)
+    return render_template("home.html", registrationform=form)
 
 @app.route("/dashboard")
 @login_required

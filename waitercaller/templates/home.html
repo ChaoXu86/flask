@@ -16,6 +16,13 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+<style type="text/css">
+ul.errors {
+    list-style-type:none;
+    padding:0;
+    color: red;
+}
+</style>
   </head>
   <body>
 
@@ -71,9 +78,9 @@
                     <div class="col-sm-9">
                     {% if registrationform.email.errors %}
                         <ul class="errors">
-                            { % for error in registrationform.email.errors % }
+                            {% for error in registrationform.email.errors %}
                             <li>{{ error }}</li>
-                            { % endfor % }
+                            {% endfor %}
                         </ul>
                     {% endif %}
                         {{ registrationform.email(class="form-control", placeholder="Email address") }}
@@ -83,9 +90,9 @@
                     <div class="col-sm-9">
                         {% if registrationform.password.errors %}
                         <ul class="errors">
-                            { % for error in registrationform.password.errors % }
+                            {% for error in registrationform.password.errors %}
                             <li>{{ error }}</li>
-                            { % endfor % }
+                            {% endfor %}
                         </ul>
                         {% endif %}
                         {{ registrationform.password(placeholder="Password",class="form-control") }}
@@ -95,9 +102,9 @@
                     <div class="col-sm-9">
                         {% if registrationform.password2.errors %}
                         <ul class="errors">
-                            { % for error in registrationform.password2.errors % }
+                            {% for error in registrationform.password2.errors %}
                             <li>{{ error }}</li>
-                            { % endfor % }
+                            {% endfor %}
                         </ul>
                         {% endif %}
                         {{ registrationform.password2(placeholder="Confirm password",class="form-control") }}
